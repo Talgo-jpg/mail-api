@@ -18,7 +18,7 @@ app.use("/api/send", rateLimit({ windowMs: 60_000, max: 10 }));
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-=const EmailSchema = z.object({
+const EmailSchema = z.object({
   to: z.string().email(),
   subject: z.string().min(1).max(200),
   html: z.string().min(1),
