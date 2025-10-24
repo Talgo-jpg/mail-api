@@ -9,33 +9,31 @@ import { Resend } from "resend";
 dotenv.config();
 
 const app = express();
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FRONT_URL = "https://mail-front-jnb4.onrender.com";
 
-const allowed = new Set([
-  "https://mail-front-jnb4.onrender.com",
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-]);
+const allowed = [FRONT_URL, "http://localhost:5173", "http://127.0.0.1:5173"];
+
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+app.use(express.json());
 
 app.use(
   cors({
     origin(origin, cb) {
       if (!origin) return cb(null, true);
-      cb(null, allowed.has(origin));
+      if (allowed.includes(origin)) return cb(null, true);
+      return cb(null, false);
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
   })
 );
+
 app.options("*", cors());
 
-app.use(express.json());
-
 app.use("/api/send", rateLimit({ windowMs: 60_000, max: 10 }));
-
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 const EmailSchema = z.object({
   to: z.string().email(),
@@ -44,6 +42,8 @@ const EmailSchema = z.object({
   cc: z.string().email().optional(),
   bcc: z.string().email().optional(),
 });
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.post("/api/send", async (req, res) => {
   const parsed = EmailSchema.safeParse(req.body);
@@ -57,26 +57,27 @@ app.post("/api/send", async (req, res) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.FROM_EMAIL, // ex: "noreply@ashtone.io"
+      from: process.env.FROM_EMAIL,
       to,
       subject,
       html,
       cc,
       bcc,
     });
-
     if (error)
       return res
         .status(502)
         .json({ error: error.message || "Erreur fournisseur" });
     return res.json({ id: data?.id || "sent" });
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     return res.status(502).json({ error: "Échec envoi" });
   }
 });
 
+// Démarrage
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () =>
-  console.log(`Mail API prête sur http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`✅ API up on :${PORT}`);
+  console.log(`CORS allowed:`, allowed);
+});
