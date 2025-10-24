@@ -39,8 +39,14 @@ const EmailSchema = z.object({
   to: z.string().email(),
   subject: z.string().min(1).max(200),
   html: z.string().min(1),
-  cc: z.string().email().optional(),
-  bcc: z.string().email().optional(),
+  cc: z.preprocess(
+    (v) => (v == null || v === "" ? undefined : v),
+    z.string().email().optional()
+  ),
+  bcc: z.preprocess(
+    (v) => (v == null || v === "" ? undefined : v),
+    z.string().email().optional()
+  ),
 });
 
 const resend = new Resend(process.env.RESEND_API_KEY);
