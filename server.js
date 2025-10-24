@@ -11,7 +11,26 @@ dotenv.config();
 const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-app.use(cors());
+const FRONT_URL = "https://mail-front-jnb4.onrender.com";
+
+const allowed = new Set([
+  FRONT_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
+
+app.use(
+  cors({
+    origin(origin, cb) {
+      if (!origin) return cb(null, true);
+      cb(null, allowed.has(origin));
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+  })
+);
+
 app.use(express.json());
 
 app.use("/api/send", rateLimit({ windowMs: 60_000, max: 10 }));
