@@ -13,8 +13,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FRONT_URL = "https://mail-front-jnb4.onrender.com";
 
+import cors from "cors";
+
 const allowed = new Set([
-  FRONT_URL,
+  "https://TON-FRONT.onrender.com", // front prod
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);
@@ -27,9 +29,9 @@ app.use(
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false,
   })
 );
+app.options("*", cors());
 
 app.use(express.json());
 
