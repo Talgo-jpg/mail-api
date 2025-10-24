@@ -16,7 +16,7 @@ const FRONT_URL = "https://mail-front-jnb4.onrender.com";
 import cors from "cors";
 
 const allowed = new Set([
-  "https://TON-FRONT.onrender.com", // front prod
+  "https://mail-front-jnb4.onrender.com",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);
