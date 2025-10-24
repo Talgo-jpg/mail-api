@@ -13,8 +13,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FRONT_URL = "https://mail-front-jnb4.onrender.com";
 
-import cors from "cors";
-
 const allowed = new Set([
   "https://mail-front-jnb4.onrender.com",
   "http://localhost:5173",
